@@ -2,10 +2,7 @@ import math
 
 
 def square(side):
-    p = side * 4
-    s = side ** 2
-    d = side * math.sqrt(2)
-    return p, s, d
+    return side * 4, side ** 2, side * math.sqrt(2)
 
 
 side = int(input('Сторона квадрата: '))
