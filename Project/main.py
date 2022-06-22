@@ -24,7 +24,6 @@ def decorator(func):
             print("Не правильное Имя или Пароль")
             return False
         return func(*args, **kwargs)
-
     return wrapper
 
 
@@ -41,6 +40,8 @@ def blocking(t1, t2):
     r = t2 - t1
     if r < timedelta(minutes=5):
         print(f"Вы заблокированы! Следующая попытка через {timedelta(minutes=5) - r} мин")
+        return True
+    return False
 
 
 if __name__ == "__main__":
