@@ -19,9 +19,10 @@ def parse():
     return parser.parse_args()
 
 
-def blocking(t1, t2):
+def blocking(t1, t2, n):
     r = t2 - t1
-    if r < timedelta(minutes=5):
+    if r < timedelta(minutes=5) and n - 1 == 0:
+        print("Попытки истекли!")
         print(f"Вы заблокированы! Следующая попытка через {timedelta(minutes=5) - r} мин")
         time.sleep(timedelta.total_seconds(timedelta(minutes=5) - r))
         return False
@@ -40,16 +41,16 @@ def decorator_name(func):
 
 def decorator_time(func):
     def wrapper(*args, **kwargs):
-        if not blocking(wrong_try, now):
+        if not blocking(wrong_try, now, n):
             return False
         return func(*args, **kwargs)
 
     return wrapper
 
 
-@decorator_time
 @decorator_name
-def login(name, password):
+@decorator_time
+def login(name, password, wrong_try, now, n):
     return True
 
 
@@ -73,11 +74,9 @@ if __name__ == "__main__":
         if n < 3:
             name = input("Введите Имя: ")
             password = input("Введите Пароль: ")
-        if login(name, password, wrong_try, now):
+        if login(name, password, wrong_try, now, n):
             print("Вы в системе!")
             break
         n -= 1
         if n:
             print(f"У вас осталось попыток: {n}")
-        else:
-            print("Попытки истекли!")
