@@ -27,7 +27,7 @@ def decorator_name(func):
         if not check_password(name, password):
             print("Не правильное Имя или Пароль")
             return False
-        elif not is_block(wrong_try, now):
+        if not is_block(wrong_try, now):
             return False
         return func(*args, **kwargs)
 
