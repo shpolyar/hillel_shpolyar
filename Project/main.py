@@ -1,10 +1,9 @@
 import argparse
 from datetime import timedelta, datetime
 
-wrong_try = datetime(2022, 6, 22, 16, 20)
-now = datetime(2022, 6, 22, 16, 23)
+time = datetime(2022, 6, 22, 16, 23)
 
-users = {"Dasha": "1111"}
+user = {'dasha': {'password': '1111', 'last_try': '2022-06-22 16:20'}}
 
 
 def parse():
@@ -14,33 +13,37 @@ def parse():
     return parser.parse_args()
 
 
-def is_block(t1, t2):
-    r = t2 - t1
+def is_block(name, time_2):
+    last_try = user[name]['last_try']
+    r = time_2 - datetime.strptime(last_try, "%Y-%m-%d %H:%M")
     if r < timedelta(minutes=5):
         print(f"Вы заблокированы! Следующая попытка через {timedelta(minutes=5) - r} мин")
         return False
     return True
 
 
-def decorator_name(func):
+def check_password(name, password):
+    if user.get(name) is not None:
+        return user.get(name).get('password') == password
+    else:
+        return False
+
+
+def decorator(func):
     def wrapper(*args, **kwargs):
         if not check_password(name, password):
             print("Не правильное Имя или Пароль")
             return False
-        if not is_block(wrong_try, now):
+        if not is_block(name, time):
             return False
         return func(*args, **kwargs)
 
     return wrapper
 
 
-@decorator_name
+@decorator
 def login(name, password, wrong_try, now):
     return True
-
-
-def check_password(name, password):
-    return users.get(name) == password
 
 
 if __name__ == "__main__":
@@ -59,7 +62,7 @@ if __name__ == "__main__":
         if n < 3:
             name = input("Введите Имя: ")
             password = input("Введите Пароль: ")
-        if login(name, password, wrong_try, now):
+        if login(name, password, time):
             print("Вы в системе!")
             break
         n -= 1
