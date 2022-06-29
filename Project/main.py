@@ -1,9 +1,22 @@
 import argparse
 from datetime import timedelta, datetime
 
+
 time = datetime(2022, 6, 22, 16, 23)
 
 user = {'dasha': {'password': '1111', 'last_try': '2022-06-22 16:20'}}
+
+
+class UserDoesNotExist(Exception):
+    pass
+
+
+def check_password(name, password):
+    if user.get(name) is not None:
+        if not user.get(name).get('password') == password:
+            raise UserDoesNotExist("Не правильное Имя или Пароль")
+    else:
+        raise UserDoesNotExist("Не правильное Имя или Пароль")
 
 
 def parse():
@@ -22,17 +35,12 @@ def is_block(name, time_2):
     return True
 
 
-def check_password(name, password):
-    if user.get(name) is not None:
-        return user.get(name).get('password') == password
-    else:
-        return False
-
-
 def decorator(func):
     def wrapper(*args, **kwargs):
-        if not check_password(name, password):
-            print("Не правильное Имя или Пароль")
+        try:
+            check_password(name, password)
+        except UserDoesNotExist as e:
+            print(e)
             return False
         if not is_block(name, time):
             return False
