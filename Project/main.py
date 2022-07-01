@@ -15,6 +15,8 @@ def check_password(name, password):
     if user.get(name) is not None:
         if not user.get(name).get('password') == password:
             raise UserDoesNotExist("Не правильное Имя или Пароль")
+        else:
+            return True
     else:
         raise UserDoesNotExist("Не правильное Имя или Пароль")
 
