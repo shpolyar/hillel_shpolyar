@@ -1,6 +1,6 @@
 import argparse
 import json
-import sys
+from sys import exit
 from datetime import timedelta, datetime
 
 
@@ -47,7 +47,7 @@ def is_block(name):
     r = datetime.now() - datetime.strptime(users[name]['last_try'], "%Y-%m-%d %H:%M")
     if r < timedelta(minutes=5):
         print(f"Вы заблокированы! Следующая попытка через {timedelta(minutes=5) - r} мин")
-        sys.exit()
+        exit()
     return True
 
 
