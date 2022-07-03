@@ -1,24 +1,38 @@
 import argparse
+import json
+import sys
 from datetime import timedelta, datetime
-
-
-time = datetime(2022, 6, 22, 16, 23)
-
-user = {'dasha': {'password': '1111', 'last_try': '2022-06-22 16:20'}}
 
 
 class UserDoesNotExist(Exception):
     pass
 
 
+def read_file(file_name):
+    try:
+        with open(file_name) as f:
+            return json.load(f)
+    except OSError as e:
+        print(e)
+
+
+def write_file(file_name, data):
+    try:
+        with open(file_name, 'w') as f:
+            json.dump(data, f, ensure_ascii=False)
+    except OSError as e:
+        print(e)
+
+
 def check_password(name, password):
-    if user.get(name) is not None:
-        if not user.get(name).get('password') == password:
-            raise UserDoesNotExist("Не правильное Имя или Пароль")
+    users = read_file('data.json')
+    if users.get(name) is not None:
+        if not users.get(name).get('password') == password:
+            raise UserDoesNotExist("Неверный Пароль")
         else:
             return True
     else:
-        raise UserDoesNotExist("Не правильное Имя или Пароль")
+        raise UserDoesNotExist("Данного имени не существует")
 
 
 def parse():
@@ -28,13 +42,22 @@ def parse():
     return parser.parse_args()
 
 
-def is_block(name, time_2):
-    last_try = user[name]['last_try']
-    r = time_2 - datetime.strptime(last_try, "%Y-%m-%d %H:%M")
+def is_block(name):
+    users = read_file('data.json')
+    r = datetime.now() - datetime.strptime(users[name]['last_try'], "%Y-%m-%d %H:%M")
     if r < timedelta(minutes=5):
         print(f"Вы заблокированы! Следующая попытка через {timedelta(minutes=5) - r} мин")
-        return False
+        sys.exit()
     return True
+
+
+def last_try(name):
+    try:
+        d = read_file('data.json')
+        d[name]['last_try'] = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M")
+        write_file('data.json', d)
+    except KeyError:
+        pass
 
 
 def decorator(func):
@@ -44,7 +67,7 @@ def decorator(func):
         except UserDoesNotExist as e:
             print(e)
             return False
-        if not is_block(name, time):
+        if not is_block(name):
             return False
         return func(*args, **kwargs)
 
@@ -52,7 +75,7 @@ def decorator(func):
 
 
 @decorator
-def login(name, password, wrong_try, now):
+def login(name, password):
     return True
 
 
@@ -72,7 +95,7 @@ if __name__ == "__main__":
         if n < 3:
             name = input("Введите Имя: ")
             password = input("Введите Пароль: ")
-        if login(name, password, time):
+        if login(name, password):
             print("Вы в системе!")
             break
         n -= 1
@@ -80,3 +103,4 @@ if __name__ == "__main__":
             print(f"У вас осталось попыток: {n}")
         else:
             print("Попытки истекли!")
+            last_try(name)
