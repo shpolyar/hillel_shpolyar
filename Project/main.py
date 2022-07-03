@@ -71,7 +71,6 @@ def is_block(name):
             print(f"Вы заблокированы! Следующая попытка через {timedelta(minutes=5) - r} мин")
             exit()
     except KeyError:
-        pass
         return False
     return True
 
